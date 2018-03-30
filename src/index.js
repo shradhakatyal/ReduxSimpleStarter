@@ -1,15 +1,41 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
+import YTSearch from 'youtube-api-search';
+import SearchBar from './components/search_bar';
+import VideoDetail from './components/video_detail';
+import VideoList from './components/video_list';
 
-import App from './components/app';
-import reducers from './reducers';
+const API_KEY = 'AIzaSyCDgi-hYJvss3-5PQVDimdXvRKB6UPAyEs';
 
-const createStoreWithMiddleware = applyMiddleware()(createStore);
+class App extends Component {
+	constructor(props) {
+		super(props);
 
-ReactDOM.render(
-  <Provider store={createStoreWithMiddleware(reducers)}>
-    <App />
-  </Provider>
-  , document.querySelector('.container'));
+		this.state = {
+			videos: [],
+			selectedVideo: null
+		};
+
+		YTSearch({key: API_KEY, term: 'Taylor Swift'}, (videos) => {
+			this.setState({ 
+				videos: videos,
+				selectedVideo: videos[0]
+			});
+			//When the name is same we can write as above. When key and property have same name.
+			// It will get resolved as: this.setState({ videos: videos }); (es6 syntax)
+		});
+	}
+	render() {
+		return (
+			<div>
+				<SearchBar />
+				<VideoDetail video={this.state.selectedVideo} />
+				<VideoList 
+				onVideoSelect = {selectedVideo => this.setState({selectedVideo})}
+				videos={this.state.videos} />
+			</div>
+		);
+	}
+}
+
+ReactDOM.render(<App/>, document.querySelector('.container'));
